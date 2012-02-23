@@ -1,9 +1,43 @@
 classdef vertSegment < clockSegment
-    %VERTSEGMENT this is a verticle segment
+    %% VERTSEGMENT A vertical segment of a seven segment display
+    %
+    % USES:
+    %
+    % seg = VERTSEGMENT;
+    % seg = VERTSEGMENT(BOOL);
+    % seg = VERTSEGMENT(X, Y);
+    % seg = VERTSEGMENT(X, Y, BOOL);
+    % seg = VERTSEGMENT(X, Y, ROWS COLUMNS);
+    %
+    % seg = VERTSEGMENT sets the status of the semgent to true and
+    % defaults the x and y location of the top left corner of the
+    % vertSegment's matrix to (0, 0).
+    %
+    % seg = VERTSEGMENT(BOOL) sets the status of the semgent to BOOL and
+    % defaults the x and y location of the top left corner of the
+    % vertSegment's matrix to (0, 0).
+    %
+    % seg = VERTSEGMENT(X, Y) sets the status of the semgent to true and
+    % sets the x and y location of the top left corner of the
+    % vertSegment's matrix to (X, Y).
+    %
+    % seg = VERTSEGMENT(X, Y, BOOL) sets the status of the semgent to BOOL
+    % and sets the x and y location of the top left corner of the
+    % vertSegment's matrix to (X, Y).
+    %
+    % seg = VERTSEGMENT(X, Y, ROWS, COLUMNS) sets the status of the semgent
+    % to true, sets the x and y location of the top left corner of the
+    % vertSegment's matrix to (X, Y), and sets the size of the VERTSEGMENT
+    % to a ROWS X COLUMNS Matrix.
+    %
+    %
+    % see also: CLOCKSEGMENT, HORSEGMENT, SEVENSEGMENTDISP, DIGITALCLOCK,
+    %           DIGICLOCK
 
+    %% Member functions for the class
     methods
-        %Default constructor
         function obj = vertSegment(varargin)
+        %Default constructor for the class
             %switch statement to parse inputs
             switch nargin
                 case 0  %if nothing is passed then set values to default
@@ -22,6 +56,12 @@ classdef vertSegment < clockSegment
                     obj.topLeftX = varargin{1};
                     obj.topLeftY = varargin{2};
                     obj.status   = varargin{3};
+                case 4  %for four inputs expect x, y, and then a boolean
+                    obj.topLeftX = varargin{1};
+                    obj.topLeftY = varargin{2};
+                    obj.rows     = varargin{3};
+                    obj.cols     = varargin{4};
+                    obj.status   = true;
                 otherwise   %otherwise put out an error
                     error('Between 0 and 3 inputs allowed');
             end
@@ -44,24 +84,24 @@ classdef vertSegment < clockSegment
             addlistener(obj,'parentClosed', @parentClosedFcn);
             addlistener(obj,'status', 'PostSet', @obj.postSetStatusFcn);
         end
-        %set the number of rows and columns
         function setDims(obj)
-            obj.rows = 15;
-            obj.cols =  5;
+        %set the number of rows and columns
+            if(isempty(obj.rows))
+                obj.rows = 15;
+                obj.cols =  5;
+            end
         end
-        %fills the segment's matrix in a desired pattern
         function fillSegment(obj)
-            %initialize segment to a green rectangle
-            obj.segMatrix(:,:,1) = ones (obj.rows,obj.cols) .* obj.r;
-            obj.segMatrix(:,:,2) = ones (obj.rows,obj.cols) .* obj.g;
-            obj.segMatrix(:,:,3) = ones (obj.rows,obj.cols) .* obj.b;
-
+        %fills the vertSegment's matrix in a desired pattern
+            %initialize vertSegment to a green rectangle
+            obj.segMatrix(:,:,1) = ones (obj.rows, obj.cols) .* obj.r;
+            obj.segMatrix(:,:,2) = ones (obj.rows, obj.cols) .* obj.g;
+            obj.segMatrix(:,:,3) = ones (obj.rows, obj.cols) .* obj.b;
             %set first and last row to begin taper
             obj.segMatrix(1,        1:2,                   :) = 0;
-            obj.segMatrix(1,        (obj.cols-1:obj.cols), :) = 0;
+            obj.segMatrix(1,        (obj.cols-1):obj.cols, :) = 0;
             obj.segMatrix(obj.rows, 1:2,                   :) = 0;
-            obj.segMatrix(obj.rows, (obj.cols-1:obj.cols), :) = 0;
-
+            obj.segMatrix(obj.rows, (obj.cols-1):obj.cols, :) = 0;
             %set second and penultimate row to finish taper
             obj.segMatrix(2,              1,        :) = 0;
             obj.segMatrix(2,              obj.cols, :) = 0;

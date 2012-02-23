@@ -1,19 +1,20 @@
 classdef clockSegment < handle
     %% CLOCKSEGMENT A clockSegment is the base class of a set of different
-    %   objects which make up a seven segment display.
+    % objects which make up a seven segment display.
     %
     % USES:
     %
     % seg = CLOCKSEGMENT;
-    % seg = CLOCKSEGMENT(bool);
+    % seg = CLOCKSEGMENT(BOOL);
     % seg = CLOCKSEGMENT(X, Y);
-    % seg = CLOCKSEGMENT(X, Y, bool);
+    % seg = CLOCKSEGMENT(X, Y, BOOL);
+    % seg = CLOCKSEGMENT(X, Y, ROWS COLUMNS);
     %
     % seg = CLOCKSEGMENT sets the status of the semgent to true and
     % defaults the x and y locations of the top left corner of the
     % clockSegment's matrix to (0, 0).
     %
-    % seg = CLOCKSEGMENT(bool) sets the status of the semgent to bool and
+    % seg = CLOCKSEGMENT(bool) sets the status of the semgent to BOOL and
     % defaults the x and y locations of the top left corner of the
     % clockSegment's matrix to (0, 0).
     %
@@ -21,14 +22,19 @@ classdef clockSegment < handle
     % sets the x and y locations of the top left corner of the
     % clockSegment's matrix to (X, Y).
     %
-    % seg = CLOCKSEGMENT(X, Y, bool sets the status of the semgent to bool
+    % seg = CLOCKSEGMENT(X, Y, bool) sets the status of the semgent to BOOL
     % and sets the x and y locations of the top left corner of the
     % clockSegment's matrix to (X, Y).
     %
+    % seg = CLOCKSEGMENT(X, Y, ROWS, COLUMNS) sets the status of the
+    % semgent to true, sets the x and y location of the top left corner of
+    % the clockSegment's matrix to (X, Y), and sets the size of the
+    % CLOCKSEGMENT to a ROWS X COLUMNS Matrix.
     %
-    %   see also: HORSEGMENT, VERTSEGMENT, SEVSEGDISP.
-    
-    
+    %
+    % see also: HORSEGMENT, VERTSEGMENT, SEVENSEGMENTDISP, DIGITALCLOCK,
+    %           DIGICLOCK
+
     %% Properties of a clockSegment
     %These properties are protected, and cannot be accessed outside of this
     %class
@@ -48,7 +54,8 @@ classdef clockSegment < handle
     properties (Access = public, SetObservable = true)
         green       %The rgb value of green to be used
         grey        %The rgb value of grey to be used
-        status      %The status of the clockSegment, true or false, which defines whether the clockSegment is on or off
+        status      %The status of the clockSegment, true or false, which
+                    %    defines whether the clockSegment is on or off
         topLeftX    %The X location of the top left corner of the segMatrix
         topLeftY    %The Y location of the top left corner of the segMatrix
     end
@@ -58,29 +65,33 @@ classdef clockSegment < handle
     end
     %% Member functions for the class
     methods
-        %Default constructor
         function obj = clockSegment(varargin)
-        %Constructor for the class
-
+        %Default constructor for the class
             %switch statement to parse inputs
             switch nargin
-                case 0  %if nothing is passed then set values to default
+                case 0 %if nothing is passed then set values to default
                     obj.status   = true;
                     obj.topLeftX = 0;
                     obj.topLeftY = 0;
-                case 1  %for one input expect a boolean
+                case 1 %for one input expect a boolean
                     obj.status   = varargin{1};
                     obj.topLeftX = 0;
                     obj.topLeftY = 0;
-                case 2  %for two inputs expect x and y values
+                case 2 %for two inputs expect x and y values
                     obj.topLeftX = varargin{1};
                     obj.topLeftY = varargin{2};
                     obj.status   = true;
-                case 3  %for three inputs expect x, y, and then a boolean
+                case 3 %for three inputs expect x, y, and then a boolean
                     obj.topLeftX = varargin{1};
                     obj.topLeftY = varargin{2};
                     obj.status   = varargin{3};
-                otherwise   %otherwise put out an error
+                case 4 %for three inputs expect x, y, and then a boolean
+                    obj.topLeftX = varargin{1};
+                    obj.topLeftY = varargin{2};
+                    obj.rows     = varargin{3};
+                    obj.cols     = varargin{4};
+                    obj.status   = true;
+                otherwise %otherwise put out an error
                     error('Between 0 and 3 inputs allowed');
             end
             %handle is null until an image is created with IMSHOW
@@ -116,8 +127,10 @@ classdef clockSegment < handle
         end
         function setDims(obj)
         %set the number of rows and columns
-            obj.rows = 10;
-            obj.cols = 10;
+            if(isempty(obj.rows))
+                obj.rows = 10;
+                obj.cols = 10;
+            end
         end
         function setRGB(obj, red, green, blue)
         %set the rbg values to be used later
@@ -135,17 +148,17 @@ classdef clockSegment < handle
             closereq
         end
         function postSetStatusFcn(obj,~,~)
-        %after the status is changed update the clockSegment and its image
+        %after obj.status is changed update the clockSegment and its image
             reInit(obj);
         end
         function disp(obj)
         %overload the DISP function to display what we want for this object
             tmpStr1 = 'The status is: %d,\n';
             tmpStr2 = 'The clockSegment is located at: (%i, %i)\n';
-            fprintf(1,                  ...
-                    [tmpStr1 tmpStr2],  ...
-                    obj.status,         ...
-                    obj.topLeftX,       ...
+            fprintf(1,                 ...
+                    [tmpStr1 tmpStr2], ...
+                    obj.status,        ...
+                    obj.topLeftX,      ...
                     obj.topLeftY);
         end
         function display(obj) %gets rid of a = at top...
@@ -154,11 +167,11 @@ classdef clockSegment < handle
         end
         function set.status(obj, value)
         %overloaded set function for status property
-
             %Check if value is a boolean
             if (value ~= true && value ~= false)
                 obj.status = true;
-                warning('Not sure what you did, using default')
+                warning('MATLAB:paramAmbiguous',...
+                        'Not sure what you did, using default')
             else
                 obj.status = value;
             end
@@ -167,7 +180,6 @@ classdef clockSegment < handle
         end
         function imshow(obj)
         %overload IMSHOW function to show the clockSegment's matrix
-
             %if the image has not been created yet set the handle
             if isempty(obj.hSegment)
                 obj.hSegment = imshow(obj.segMatrix);
@@ -185,8 +197,8 @@ classdef clockSegment < handle
             end
         end
         function reInit(obj)
-        %checks the clockSegment's status and refils the matrix accordingly
-        %   then shows the updated image
+        %checks the clockSegment's status and refills the matrix
+        %accordingly then shows the updated image
             if(obj.status)
                 setRGB(obj, 0, obj.green, 0);
             else
@@ -202,20 +214,19 @@ classdef clockSegment < handle
         end
         function fillSegment(obj)
         %fills the clockSegment's matrix in a desired pattern
-
             %initialize clockSegment to a green rectangle
-            obj.segMatrix(:,:,1) = ones (obj.rows,obj.cols) .* obj.r;
-            obj.segMatrix(:,:,2) = ones (obj.rows,obj.cols) .* obj.g;
-            obj.segMatrix(:,:,3) = ones (obj.rows,obj.cols) .* obj.b;
+            obj.segMatrix(:,:,1) = ones (obj.rows, obj.cols) .* obj.r;
+            obj.segMatrix(:,:,2) = ones (obj.rows, obj.cols) .* obj.g;
+            obj.segMatrix(:,:,3) = ones (obj.rows, obj.cols) .* obj.b;
             %set first and last row to begin taper
-            obj.segMatrix(1:2, 1, :)                         = 0;
-            obj.segMatrix((obj.rows-1:obj.rows), 1, :)       = 0;
-            obj.segMatrix(1:2,obj.cols, :)                   = 0;
-            obj.segMatrix((obj.rows-1:obj.rows), obj.cols,:) = 0;
+            obj.segMatrix(1:2,                   1,        :) = 0;
+            obj.segMatrix((obj.rows-1):obj.rows, 1,        :) = 0;
+            obj.segMatrix(1:2,                   obj.cols, :) = 0;
+            obj.segMatrix((obj.rows-1):obj.rows, obj.cols, :) = 0;
             %set second and penultimate row to finish taper
-            obj.segMatrix(1, 2, :)                     = 0;
-            obj.segMatrix(obj.rows, 2, :)              = 0;
-            obj.segMatrix(1,(obj.cols - 1), :)         = 0;
+            obj.segMatrix(1,        2,              :) = 0;
+            obj.segMatrix(obj.rows, 2,              :) = 0;
+            obj.segMatrix(1,        (obj.cols - 1), :) = 0;
             obj.segMatrix(obj.rows, (obj.cols - 1), :) = 0;
         end
     end
