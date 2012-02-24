@@ -1,12 +1,13 @@
-a = digiClock;
+%create a digiClock object
+clk = digiClock;
+%remove the menubar for a simplified look
 
-set(gcf,'doublebuffer','on');
+%stop and delete the timer when the figure is closed
 set(gcf, 'closerequestfcn','stop(t);delete(t);delete(gcf)');
-set(gcf, 'menubar','none', 'WindowStyle', 'docked');
-
-%Build Timer object and turn on timer
-%delay for 1/2 second so rest of setup finishes
+%Build Timer object that will update every 0.5 seconds
 t = timer('period',0.5);
 set(t,'ExecutionMode','fixedrate','StartDelay',0);
-set(t,'timerfcn','a.flagChange = ~a.flagChange;');
+%make the timer set the flagChange parameter everytime it executes
+set(t,'timerfcn','clk.flagChange = ~clk.flagChange;');
+%start the timer
 start(t);

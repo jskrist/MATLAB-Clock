@@ -2,12 +2,15 @@ classdef sevenSegmentDisplay < handle
     %% SEVENSEGMENTDISPLAY is a container for seven segment objects, three
     % horizontal segments and four vertical segments.
     %
-    % USES:
+    % Syntax:
     %
     % seg = SEVENSEGMENTDISPLAY;
     % seg = SEVENSEGMENTDISPLAY(NUM);
     % seg = SEVENSEGMENTDISPLAY(X, Y);
     % seg = SEVENSEGMENTDISPLAY(X, Y, NUM);
+    %
+    %
+    % Description:
     %
     % seg = SEVENSEGMENTDISPLAY defaults the number displayed to 0 and
     % the x and y locations of the top left corner of the
@@ -26,28 +29,29 @@ classdef sevenSegmentDisplay < handle
     % sevenSegmentDisplay's matrix to (X, Y).
     %
     %
-    % see also: CLOCKSEGMENT, VERTSEGMENT, SEVSEGDISP, DIGITALCLOCK,
-    %           DIGICLOCK
+    % see also: CLOCKSEGMENT, HORSEGMENT, VERTSEGMENT, DIGICLOCK
 
     %% Properties of a seven segment display
     %These properties are protected, and cannot be accessed outside of this
     %class
     properties (Access = protected)
-        rows
-        cols
-        sevSegDispMatrix
-        hSevSegDisp
-        black
+        rows             %number of rows in sevenSegmentDisplay's matrix
+        cols             %number of columns in sevenSegmentDisplay's matrix
+        sevSegDispMatrix %a matrix to be filled, then shown with IMSHOW
+        hSevSegDisp      %a handle to the figure of the sevenSegmentDisplay
+        black            %a value of 255, used to normalize clockMatrix
     end
     %These properties are public, and can be accessed outside the class.
     %They are also observable, which means they can be watched by a
     %   listener function.
     properties (Access = public, SetObservable = true)
-        topLeftX
-        topLeftY
-        horSegments
-        vertSegments
-        number
+        topLeftX     %X location of the top left corner
+                     %  of the sevSegDispMatrix
+        topLeftY     %Y location of the top left corner
+                     %  of the sevSegDispMatrix
+        horSegments  %vector containing horSegment objects
+        vertSegments %vector containing vertSegment objects
+        number       %number to be displayed
     end
     %% Custom events to be listened for by the class
     events
@@ -57,27 +61,7 @@ classdef sevenSegmentDisplay < handle
     methods
         function obj = sevenSegmentDisplay(varargin)
         %Default constructor for the class
-            %switch statement to parse inputs
-            switch nargin
-                case 0 %if nothing is passed then set values to default
-                    obj.number   = 0;
-                    obj.topLeftX = 0;
-                    obj.topLeftY = 0;
-                case 1 %for one input expect a number
-                    obj.number   = varargin{1};
-                    obj.topLeftX = 0;
-                    obj.topLeftY = 0;
-                case 2 %for two inputs expect x and y values
-                    obj.topLeftX = varargin{1};
-                    obj.topLeftY = varargin{2};
-                    obj.number   = 0;
-                case 3 %for three inputs expect x, y, and then a number
-                    obj.topLeftX = varargin{1};
-                    obj.topLeftY = varargin{2};
-                    obj.number   = varargin{3};
-                otherwise %otherwise put out an error
-                    error('Between 0 and 3 inputs allowed');
-            end
+
             %handle is null until an image is created with IMSHOW
             obj.hSevSegDisp = [];
             %Initialize Display Segment Locations
@@ -101,6 +85,27 @@ classdef sevenSegmentDisplay < handle
             setDims(obj);
             %set black to 255
             obj.black = 255;
+            %switch statement to parse inputs
+            switch nargin
+                case 0 %if nothing is passed then set values to default
+                    obj.number   = 0;
+                    obj.topLeftX = 0;
+                    obj.topLeftY = 0;
+                case 1 %for one input expect a number
+                    obj.number   = varargin{1};
+                    obj.topLeftX = 0;
+                    obj.topLeftY = 0;
+                case 2 %for two inputs expect x and y values
+                    obj.topLeftX = varargin{1};
+                    obj.topLeftY = varargin{2};
+                    obj.number   = 0;
+                case 3 %for three inputs expect x, y, and then a number
+                    obj.topLeftX = varargin{1};
+                    obj.topLeftY = varargin{2};
+                    obj.number   = varargin{3};
+                otherwise %otherwise put out an error
+                    error('Between 0 and 3 inputs allowed');
+            end
             %initializes and fills the sevenSegmentDisplays's matrix with
             %   color
             reInit(obj);
@@ -117,7 +122,7 @@ classdef sevenSegmentDisplay < handle
             cols = obj.cols;
         end
         function mat = getMat(obj)
-        %get the number of columns
+        %get the sevenSegmentDisplay's Matrix
             mat = obj.sevSegDispMatrix;
         end
         function setDims(obj)
@@ -131,12 +136,12 @@ classdef sevenSegmentDisplay < handle
         %when the parent object is closed set the handle to null
             obj.hSevSegDisp = [];
         end
-        function notifyCloseParent(obj,source,eventData)
+        function notifyCloseParent(obj,~,~)
         %function necessary for custom event?
             notify(obj, 'parentClosed')
             closereq
         end
-        function postSetNumberFcn(obj,meta,eventData)
+        function postSetNumberFcn(obj,~,~)
         %after obj.number is changed update the sevenSegmentDisplay's image
             reInit(obj);
         end
@@ -156,14 +161,16 @@ classdef sevenSegmentDisplay < handle
         end
         function set.number(obj, value)
         %overloaded set function for status property
+
             %Check if value is between 0 and 9
             if (value < 0 || value > 9)
-                warning('only integers from 0 - 9 allowed, not changed');
+                warning('MATLAB:paramAmbiguous',...
+                        'only integers from 0 - 9 allowed, not changed');
             else
                 %Set the segments' statuses to show nummber given
                 switch value
                     case 0
-                        obj.horSegments (1).status = true;
+                        obj.horSegments (1).status = true; %#ok<*MCSUP>
                         obj.horSegments (2).status = false;
                         obj.horSegments (3).status = true;
                         obj.vertSegments(1).status = true;
@@ -250,7 +257,8 @@ classdef sevenSegmentDisplay < handle
                         obj.vertSegments(2).status = false;
                         obj.vertSegments(3).status = false;
                         obj.vertSegments(4).status = false;
-                        warning('Something went wrong in setting the number\n');
+                        warning('MATLAB:paramAmbiguous',...
+                                'Something went wrong setting a number\n');
                 end
                 obj.number = value;
             end
@@ -259,6 +267,7 @@ classdef sevenSegmentDisplay < handle
         end
         function imshow(obj)
         %overload IMSHOW function to show the sevenSegmentDisplay's matrix
+
             %if the image has not been created yet set the handle
             if isempty(obj.hSevSegDisp)
                 obj.hSevSegDisp = imshow(obj.sevSegDispMatrix./obj.black);
@@ -270,7 +279,7 @@ classdef sevenSegmentDisplay < handle
                     set(obj.hSevSegDisp, 'CData', obj.sevSegDispMatrix...
                                                 ./obj.black);
                 else
-                    %Do nothing (it was ploted but has since disappeared
+                    %Do nothing (it was ploted but has since disappeared)
                     obj.hSevSegDisp = [];
                 end
             end
@@ -284,6 +293,8 @@ classdef sevenSegmentDisplay < handle
             end
         end
         function populateDisplay(obj)
+        %fills the sevenSegmentDisplay with it's seven segments
+
             %initialize segment to a black rectangle
             obj.sevSegDispMatrix = zeros (obj.rows,obj.cols,3);
             %fills sevenSegmentDisplay with the segments

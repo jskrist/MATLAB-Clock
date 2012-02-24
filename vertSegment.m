@@ -1,13 +1,16 @@
 classdef vertSegment < clockSegment
     %% VERTSEGMENT A vertical segment of a seven segment display
     %
-    % USES:
+    % Syntax:
     %
     % seg = VERTSEGMENT;
     % seg = VERTSEGMENT(BOOL);
     % seg = VERTSEGMENT(X, Y);
     % seg = VERTSEGMENT(X, Y, BOOL);
     % seg = VERTSEGMENT(X, Y, ROWS COLUMNS);
+    %
+    %
+    % Description:
     %
     % seg = VERTSEGMENT sets the status of the semgent to true and
     % defaults the x and y location of the top left corner of the
@@ -31,13 +34,24 @@ classdef vertSegment < clockSegment
     % to a ROWS X COLUMNS Matrix.
     %
     %
-    % see also: CLOCKSEGMENT, HORSEGMENT, SEVENSEGMENTDISP, DIGITALCLOCK,
-    %           DIGICLOCK
+    % see also: CLOCKSEGMENT, HORSEGMENT, SEVENSEGMENTDISPLAY, DIGICLOCK
 
     %% Member functions for the class
     methods
         function obj = vertSegment(varargin)
         %Default constructor for the class
+
+            %handle is null until an image is created with IMSHOW
+            obj.hSegment = [];
+            %variables to store green and grey rgb values
+            obj.green = 179;
+            obj.grey  = 32;
+            %set black to 255
+            obj.black = 255;
+            %rgb values 0 - 255
+            obj.r     = 0;
+            obj.g     = obj.green;
+            obj.b     = 0;
             %switch statement to parse inputs
             switch nargin
                 case 0  %if nothing is passed then set values to default
@@ -65,17 +79,6 @@ classdef vertSegment < clockSegment
                 otherwise   %otherwise put out an error
                     error('Between 0 and 3 inputs allowed');
             end
-            %handle is null until an image is created with IMSHOW
-            obj.hSegment = [];
-            %variables to store green and grey rgb values
-            obj.green = 179;
-            obj.grey  = 32;
-            %set black to 255
-            obj.black = 255;
-            %rgb values 0 - 255
-            obj.r     = 0;
-            obj.g     = obj.green;
-            obj.b     = 0;
             %set the row and column size for the segment's matrix
             setDims(obj)
             %initializes and fills the segment's matrix with color

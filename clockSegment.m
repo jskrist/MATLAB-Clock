@@ -2,13 +2,17 @@ classdef clockSegment < handle
     %% CLOCKSEGMENT A clockSegment is the base class of a set of different
     % objects which make up a seven segment display.
     %
-    % USES:
+    %
+    % Syntax:
     %
     % seg = CLOCKSEGMENT;
     % seg = CLOCKSEGMENT(BOOL);
     % seg = CLOCKSEGMENT(X, Y);
     % seg = CLOCKSEGMENT(X, Y, BOOL);
     % seg = CLOCKSEGMENT(X, Y, ROWS COLUMNS);
+    %
+    %
+    % Description:
     %
     % seg = CLOCKSEGMENT sets the status of the semgent to true and
     % defaults the x and y locations of the top left corner of the
@@ -32,32 +36,32 @@ classdef clockSegment < handle
     % CLOCKSEGMENT to a ROWS X COLUMNS Matrix.
     %
     %
-    % see also: HORSEGMENT, VERTSEGMENT, SEVENSEGMENTDISP, DIGITALCLOCK,
-    %           DIGICLOCK
+    % see also: HORSEGMENT, VERTSEGMENT, SEVENSEGMENTDISPLAY, DIGICLOCK,
+    %           CLOCKCOLON
 
     %% Properties of a clockSegment
     %These properties are protected, and cannot be accessed outside of this
     %class
     properties (Access = protected)
-        rows        %Number of rows in the segments matrix
-        cols        %Number of columns in the segments matrix
-        segMatrix   %A matrix which can be filled, then shown with IMSHOW
-        black       %A value of 255 which is used to normalize segMatrix 
-        hSegment    %A handle to the figure of the clockSegment
-        r           %The red value of an rgb image/matrix
-        g           %The green value of an rgb image/matrix
-        b           %The blue value of an rgb image/matrix
+        rows        %number of rows in the segment's matrix
+        cols        %number of columns in the segment's matrix
+        segMatrix   %a matrix which can be filled, then shown with IMSHOW
+        black       %a value of 255 which is used to normalize segMatrix 
+        hSegment    %a handle to the figure of the clockSegment
+        r           %the red value of an rgb image/matrix
+        g           %the green value of an rgb image/matrix
+        b           %the blue value of an rgb image/matrix
     end
     %These properties are public, and can be accessed outside the class.
     %They are also observable, which means they can be watched by a
     %   listener function.
     properties (Access = public, SetObservable = true)
-        green       %The rgb value of green to be used
-        grey        %The rgb value of grey to be used
-        status      %The status of the clockSegment, true or false, which
+        green       %the rgb value of green to be used
+        grey        %the rgb value of grey to be used
+        status      %the status of the clockSegment, true or false, which
                     %    defines whether the clockSegment is on or off
-        topLeftX    %The X location of the top left corner of the segMatrix
-        topLeftY    %The Y location of the top left corner of the segMatrix
+        topLeftX    %the X location of the top left corner of the segMatrix
+        topLeftY    %the Y location of the top left corner of the segMatrix
     end
     %% Custom events to be listened for by the class
     events
@@ -67,6 +71,18 @@ classdef clockSegment < handle
     methods
         function obj = clockSegment(varargin)
         %Default constructor for the class
+
+            %handle is null until an image is created with IMSHOW
+            obj.hSegment = [];
+            %variables to store green and grey rgb values
+            obj.green = 179;
+            obj.grey  = 32;
+            %set black to 255
+            obj.black = 255;
+            %rgb values 0 - 255
+            obj.r     = 0;
+            obj.g     = obj.green;
+            obj.b     = 0;
             %switch statement to parse inputs
             switch nargin
                 case 0 %if nothing is passed then set values to default
@@ -94,17 +110,6 @@ classdef clockSegment < handle
                 otherwise %otherwise put out an error
                     error('Between 0 and 3 inputs allowed');
             end
-            %handle is null until an image is created with IMSHOW
-            obj.hSegment = [];
-            %variables to store green and grey rgb values
-            obj.green = 179;
-            obj.grey  = 32;
-            %set black to 255
-            obj.black = 255;
-            %rgb values 0 - 255
-            obj.r     = 0;
-            obj.g     = obj.green;
-            obj.b     = 0;
             %set the row and column size for the clockSegment's matrix
             setDims(obj)
             %initializes and fills the clockSegment's matrix with color
@@ -122,7 +127,7 @@ classdef clockSegment < handle
             cols = obj.cols;
         end
         function mat = getMat(obj)
-        %get the number of columns
+        %get the clockSegment's Matrix
             mat = obj.segMatrix;
         end
         function setDims(obj)
@@ -167,6 +172,7 @@ classdef clockSegment < handle
         end
         function set.status(obj, value)
         %overloaded set function for status property
+
             %Check if value is a boolean
             if (value ~= true && value ~= false)
                 obj.status = true;
